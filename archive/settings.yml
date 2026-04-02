@@ -1,0 +1,23 @@
+# Sglang and ollama are not recommended together.
+
+
+# SGLang + Ollama Configuration
+
+ollama:
+  base_url: "http://localhost:11434/v1"
+  api_key: "ollama"
+  model_name: "qwen3:8b"
+
+generation:
+  max_tokens: 4096
+  temperature: 0.1
+
+server:
+  host: "0.0.0.0"
+  port: 8000
+  reload: true
+
+metadata:
+  name: "sglang-ollama"
+  description: "SGLang and Ollama configuration for language model generation."
+  version: "1.0.0"

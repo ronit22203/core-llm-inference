@@ -1,0 +1,504 @@
+{
+  "medical_queries": [
+    {
+      "id": 1,
+      "category": "Drug Interactions",
+      "query": "What are the clinically significant interactions between warfarin and NSAIDs?"
+    },
+    {
+      "id": 2,
+      "category": "Drug Interactions",
+      "query": "Can metformin be safely co-administered with contrast dye in diabetic patients?"
+    },
+    {
+      "id": 3,
+      "category": "Drug Interactions",
+      "query": "What is the interaction profile of SSRIs with triptans and what is the risk of serotonin syndrome?"
+    },
+    {
+      "id": 4,
+      "category": "Drug Interactions",
+      "query": "List contraindicated drug combinations in patients on MAO inhibitors."
+    },
+    {
+      "id": 5,
+      "category": "Drug Interactions",
+      "query": "What are the QT-prolonging drug combinations to avoid in cardiac patients?"
+    },
+    {
+      "id": 6,
+      "category": "Clinical Guidelines",
+      "query": "What are the latest AHA/ACC guidelines for initiating statin therapy in primary prevention?"
+    },
+    {
+      "id": 7,
+      "category": "Clinical Guidelines",
+      "query": "What does the USPSTF recommend for colorectal cancer screening starting age?"
+    },
+    {
+      "id": 8,
+      "category": "Clinical Guidelines",
+      "query": "Summarize the 2024 ESC guidelines on atrial fibrillation management."
+    },
+    {
+      "id": 9,
+      "category": "Clinical Guidelines",
+      "query": "What are the current WHO criteria for diagnosing gestational diabetes?"
+    },
+    {
+      "id": 10,
+      "category": "Clinical Guidelines",
+      "query": "What are the GOLD staging criteria for COPD and corresponding treatment recommendations?"
+    },
+    {
+      "id": 11,
+      "category": "Differential Diagnosis",
+      "query": "What is the differential diagnosis for a 45-year-old with acute onset chest pain and diaphoresis?"
+    },
+    {
+      "id": 12,
+      "category": "Differential Diagnosis",
+      "query": "What are the common causes of elevated alkaline phosphatase with normal bilirubin?"
+    },
+    {
+      "id": 13,
+      "category": "Differential Diagnosis",
+      "query": "Differential for a young woman with fatigue, weight gain, cold intolerance, and constipation."
+    },
+    {
+      "id": 14,
+      "category": "Differential Diagnosis",
+      "query": "What conditions should be ruled out in a patient presenting with recurrent syncope?"
+    },
+    {
+      "id": 15,
+      "category": "Differential Diagnosis",
+      "query": "Differential diagnosis of painless jaundice in a 65-year-old male."
+    },
+    {
+      "id": 16,
+      "category": "Pharmacology",
+      "query": "What is the mechanism of action of SGLT2 inhibitors and their cardiovascular benefits?"
+    },
+    {
+      "id": 17,
+      "category": "Pharmacology",
+      "query": "How do PD-1/PD-L1 checkpoint inhibitors work and what are their major adverse effects?"
+    },
+    {
+      "id": 18,
+      "category": "Pharmacology",
+      "query": "What is the dosing adjustment for vancomycin in patients with renal impairment?"
+    },
+    {
+      "id": 19,
+      "category": "Pharmacology",
+      "query": "Explain the pharmacokinetics of lithium and monitoring parameters required."
+    },
+    {
+      "id": 20,
+      "category": "Pharmacology",
+      "query": "What is the mechanism behind heparin-induced thrombocytopenia and how is it managed?"
+    },
+    {
+      "id": 21,
+      "category": "Lab Interpretation",
+      "query": "How do I interpret an elevated D-dimer in a post-surgical patient?"
+    },
+    {
+      "id": 22,
+      "category": "Lab Interpretation",
+      "query": "What does a low anion gap indicate and what are common causes?"
+    },
+    {
+      "id": 23,
+      "category": "Lab Interpretation",
+      "query": "Interpret the following ABG: pH 7.28, PaCO2 55, HCO3 24."
+    },
+    {
+      "id": 24,
+      "category": "Lab Interpretation",
+      "query": "What is the significance of a positive ANA titer of 1:640 with speckled pattern?"
+    },
+    {
+      "id": 25,
+      "category": "Lab Interpretation",
+      "query": "When is an elevated troponin not indicative of ACS?"
+    },
+    {
+      "id": 26,
+      "category": "Oncology",
+      "query": "What are the first-line treatment options for HER2-positive metastatic breast cancer?"
+    },
+    {
+      "id": 27,
+      "category": "Oncology",
+      "query": "Summarize the evidence for adjuvant immunotherapy in stage III melanoma."
+    },
+    {
+      "id": 28,
+      "category": "Oncology",
+      "query": "What biomarkers predict response to immunotherapy in non-small cell lung cancer?"
+    },
+    {
+      "id": 29,
+      "category": "Oncology",
+      "query": "What is the role of BRCA1/2 testing in ovarian cancer management?"
+    },
+    {
+      "id": 30,
+      "category": "Oncology",
+      "query": "What are CAR-T cell therapies currently approved for hematologic malignancies?"
+    },
+    {
+      "id": 31,
+      "category": "Infectious Disease",
+      "query": "What is the empiric antibiotic regimen for community-acquired pneumonia requiring hospitalization?"
+    },
+    {
+      "id": 32,
+      "category": "Infectious Disease",
+      "query": "How is sepsis defined by Sepsis-3 criteria and what is the initial management bundle?"
+    },
+    {
+      "id": 33,
+      "category": "Infectious Disease",
+      "query": "What are the treatment options for carbapenem-resistant Klebsiella pneumoniae?"
+    },
+    {
+      "id": 34,
+      "category": "Infectious Disease",
+      "query": "What is the current first-line regimen for drug-sensitive pulmonary tuberculosis?"
+    },
+    {
+      "id": 35,
+      "category": "Infectious Disease",
+      "query": "When should antifungal prophylaxis be considered in immunocompromised patients?"
+    },
+    {
+      "id": 36,
+      "category": "Cardiology",
+      "query": "What is the evidence base for beta-blocker use in heart failure with preserved ejection fraction?"
+    },
+    {
+      "id": 37,
+      "category": "Cardiology",
+      "query": "What are the indications for ICD implantation in ischemic cardiomyopathy?"
+    },
+    {
+      "id": 38,
+      "category": "Cardiology",
+      "query": "How is the CHA2DS2-VASc score used and at what threshold is anticoagulation recommended?"
+    },
+    {
+      "id": 39,
+      "category": "Cardiology",
+      "query": "What is the role of high-sensitivity CRP in cardiovascular risk stratification?"
+    },
+    {
+      "id": 40,
+      "category": "Cardiology",
+      "query": "Compare the efficacy of DOACs vs warfarin in patients with AF and chronic kidney disease."
+    },
+    {
+      "id": 41,
+      "category": "Neurology",
+      "query": "What is the time window for IV tPA administration in acute ischemic stroke?"
+    },
+    {
+      "id": 42,
+      "category": "Neurology",
+      "query": "How is status epilepticus managed in the emergency setting?"
+    },
+    {
+      "id": 43,
+      "category": "Neurology",
+      "query": "What are the diagnostic criteria for multiple sclerosis per McDonald criteria 2017?"
+    },
+    {
+      "id": 44,
+      "category": "Neurology",
+      "query": "Summarize disease-modifying therapies available for relapsing-remitting MS."
+    },
+    {
+      "id": 45,
+      "category": "Neurology",
+      "query": "What is the evidence for lecanemab and donanemab in early Alzheimer's disease?"
+    },
+    {
+      "id": 46,
+      "category": "Endocrinology",
+      "query": "What are the targets for HbA1c, blood pressure, and LDL in a patient with type 2 diabetes?"
+    },
+    {
+      "id": 47,
+      "category": "Endocrinology",
+      "query": "How is thyroid storm diagnosed and managed?"
+    },
+    {
+      "id": 48,
+      "category": "Endocrinology",
+      "query": "What is the workup for adrenal incidentaloma found on CT?"
+    },
+    {
+      "id": 49,
+      "category": "Endocrinology",
+      "query": "What are the indications for insulin therapy initiation in type 2 diabetes?"
+    },
+    {
+      "id": 50,
+      "category": "Endocrinology",
+      "query": "How is Cushing's syndrome differentiated from pseudo-Cushing states biochemically?"
+    },
+    {
+      "id": 51,
+      "category": "Nephrology",
+      "query": "What are the KDIGO criteria for staging acute kidney injury?"
+    },
+    {
+      "id": 52,
+      "category": "Nephrology",
+      "query": "When is renal replacement therapy indicated in AKI?"
+    },
+    {
+      "id": 53,
+      "category": "Nephrology",
+      "query": "What is the mechanism of proteinuria in diabetic nephropathy and how is it managed?"
+    },
+    {
+      "id": 54,
+      "category": "Nephrology",
+      "query": "How do you differentiate prerenal azotemia from intrinsic renal failure using urine indices?"
+    },
+    {
+      "id": 55,
+      "category": "Nephrology",
+      "query": "What are the indications for urgent dialysis using the AEIOU mnemonic?"
+    },
+    {
+      "id": 56,
+      "category": "Gastroenterology",
+      "query": "What is the Child-Pugh and MELD score used for in cirrhosis management?"
+    },
+    {
+      "id": 57,
+      "category": "Gastroenterology",
+      "query": "What is the first-line treatment for H. pylori eradication per current guidelines?"
+    },
+    {
+      "id": 58,
+      "category": "Gastroenterology",
+      "query": "How is spontaneous bacterial peritonitis diagnosed and treated?"
+    },
+    {
+      "id": 59,
+      "category": "Gastroenterology",
+      "query": "What are the indications for biologics in moderate-to-severe Crohn's disease?"
+    },
+    {
+      "id": 60,
+      "category": "Gastroenterology",
+      "query": "What is the management algorithm for upper GI bleeding with a Rockford score > 6?"
+    },
+    {
+      "id": 61,
+      "category": "Pulmonology",
+      "query": "What are the diagnostic criteria for ARDS by the Berlin definition?"
+    },
+    {
+      "id": 62,
+      "category": "Pulmonology",
+      "query": "What is the lung-protective ventilation strategy and evidence behind it?"
+    },
+    {
+      "id": 63,
+      "category": "Pulmonology",
+      "query": "When is bronchoscopy indicated in the workup of a pulmonary nodule?"
+    },
+    {
+      "id": 64,
+      "category": "Pulmonology",
+      "query": "Compare dupilumab, mepolizumab, and benralizumab for severe eosinophilic asthma."
+    },
+    {
+      "id": 65,
+      "category": "Pulmonology",
+      "query": "What is the Wells score and how is it applied in suspected pulmonary embolism?"
+    },
+    {
+      "id": 66,
+      "category": "Rheumatology",
+      "query": "What is the treat-to-target strategy in rheumatoid arthritis?"
+    },
+    {
+      "id": 67,
+      "category": "Rheumatology",
+      "query": "How is lupus nephritis classified and what are the treatment implications?"
+    },
+    {
+      "id": 68,
+      "category": "Rheumatology",
+      "query": "What are the ACR/EULAR 2019 classification criteria for SLE?"
+    },
+    {
+      "id": 69,
+      "category": "Rheumatology",
+      "query": "When is hydroxychloroquine insufficient and what is the escalation pathway in SLE?"
+    },
+    {
+      "id": 70,
+      "category": "Rheumatology",
+      "query": "What is the mechanism and safety profile of JAK inhibitors in inflammatory arthritis?"
+    },
+    {
+      "id": 71,
+      "category": "Hematology",
+      "query": "What is the workup for unexplained thrombocytopenia in an adult?"
+    },
+    {
+      "id": 72,
+      "category": "Hematology",
+      "query": "How is the diagnosis of TTP differentiated from HUS clinically and biochemically?"
+    },
+    {
+      "id": 73,
+      "category": "Hematology",
+      "query": "What are the indications for bone marrow biopsy in a patient with pancytopenia?"
+    },
+    {
+      "id": 74,
+      "category": "Hematology",
+      "query": "Summarize the current treatment approach for newly diagnosed multiple myeloma."
+    },
+    {
+      "id": 75,
+      "category": "Hematology",
+      "query": "What are the WHO 2022 diagnostic criteria for polycythemia vera?"
+    },
+    {
+      "id": 76,
+      "category": "Pediatrics",
+      "query": "What are the Centor criteria modified for pediatric pharyngitis and when should antibiotics be given?"
+    },
+    {
+      "id": 77,
+      "category": "Pediatrics",
+      "query": "What is the diagnostic approach for a child with failure to thrive?"
+    },
+    {
+      "id": 78,
+      "category": "Pediatrics",
+      "query": "How is Kawasaki disease diagnosed and what is the role of IVIG?"
+    },
+    {
+      "id": 79,
+      "category": "Pediatrics",
+      "query": "What are the current CDC immunization schedule milestones for the first 2 years of life?"
+    },
+    {
+      "id": 80,
+      "category": "Pediatrics",
+      "query": "What is the management of neonatal hyperbilirubinemia requiring phototherapy?"
+    },
+    {
+      "id": 81,
+      "category": "Clinical Trials",
+      "query": "What did the EMPEROR-Reduced trial demonstrate about empagliflozin in HFrEF?"
+    },
+    {
+      "id": 82,
+      "category": "Clinical Trials",
+      "query": "Summarize the TOPAZ-1 trial findings on durvalumab in biliary tract cancer."
+    },
+    {
+      "id": 83,
+      "category": "Clinical Trials",
+      "query": "What were the key outcomes of the RECOVERY trial for COVID-19 treatment?"
+    },
+    {
+      "id": 84,
+      "category": "Clinical Trials",
+      "query": "What is the ISCHEMIA trial and what did it conclude about revascularization in stable CAD?"
+    },
+    {
+      "id": 85,
+      "category": "Clinical Trials",
+      "query": "What did PARADIGM-HF show about sacubitril/valsartan versus enalapril?"
+    },
+    {
+      "id": 86,
+      "category": "Medical Ethics & Regulation",
+      "query": "What constitutes informed consent for an off-label drug use in oncology?"
+    },
+    {
+      "id": 87,
+      "category": "Medical Ethics & Regulation",
+      "query": "How should a clinician handle a patient refusing a life-saving blood transfusion on religious grounds?"
+    },
+    {
+      "id": 88,
+      "category": "Medical Ethics & Regulation",
+      "query": "What are the HIPAA requirements around sharing patient data with research teams?"
+    },
+    {
+      "id": 89,
+      "category": "Medical Ethics & Regulation",
+      "query": "What is the ethical framework for withdrawing mechanical ventilation in an ICU patient?"
+    },
+    {
+      "id": 90,
+      "category": "Medical Ethics & Regulation",
+      "query": "What are FDA breakthrough therapy designation criteria and what advantage does it confer?"
+    },
+    {
+      "id": 91,
+      "category": "Research Methodology",
+      "query": "What is the difference between number needed to treat and number needed to harm?"
+    },
+    {
+      "id": 92,
+      "category": "Research Methodology",
+      "query": "How do you assess the risk of bias in a randomized controlled trial?"
+    },
+    {
+      "id": 93,
+      "category": "Research Methodology",
+      "query": "What is a Bayesian adaptive trial design and when is it preferred over frequentist designs?"
+    },
+    {
+      "id": 94,
+      "category": "Research Methodology",
+      "query": "How should I interpret a hazard ratio of 0.72 with 95% CI of 0.58–0.89?"
+    },
+    {
+      "id": 95,
+      "category": "Research Methodology",
+      "query": "What is the GRADE framework and how does it classify quality of evidence?"
+    },
+    {
+      "id": 96,
+      "category": "Rare Diseases",
+      "query": "What are the diagnostic criteria and treatment options for systemic mastocytosis?"
+    },
+    {
+      "id": 97,
+      "category": "Rare Diseases",
+      "query": "How is amyloidosis differentiated by type and what are the treatment implications?"
+    },
+    {
+      "id": 98,
+      "category": "Rare Diseases",
+      "query": "What is the current standard of care for Wilson's disease?"
+    },
+    {
+      "id": 99,
+      "category": "Rare Diseases",
+      "query": "Summarize the management of hereditary angioedema including acute attack and prophylaxis."
+    },
+    {
+      "id": 100,
+      "category": "Rare Diseases",
+      "query": "What are the phenotypic presentations and genetic basis of Ehlers-Danlos syndrome subtypes?"
+    }
+  ]
+}
