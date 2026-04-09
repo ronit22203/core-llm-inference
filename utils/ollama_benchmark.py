@@ -93,6 +93,8 @@ CHIP_BANDWIDTH_GBPS: Dict[str, float] = {
 class BenchResult:
     query_id:         int
     category:         str
+    query:            str       # Full original query text
+    model_response:   str       # Full generated response from the model
     query_snippet:    str
     model:            str
     # Core inference metrics
@@ -285,6 +287,7 @@ def benchmark_query(
     except Exception as exc:
         return BenchResult(
             query_id=query["id"], category=query["category"],
+            query=query["query"], model_response="",
             query_snippet=query["query"][:70], model=model,
             ttft_ms=0, tps=0, tpot_ms=0, itl_ms=0,
             prompt_tokens=0, output_tokens=0,
@@ -293,6 +296,9 @@ def benchmark_query(
             mem_used_gb=0, mem_free_gb=0, mem_total_gb=0,
             mbu_pct=0, model_size_gb=model_size_gb, error=str(exc),
         )
+
+    # Reconstruct full model response from chunks
+    model_response = "".join(chunk.get("response", "") for chunk in chunks if chunk.get("response"))
 
     mem = get_memory_stats()
     final = next((c for c in reversed(chunks) if c.get("done")), {})
@@ -321,6 +327,8 @@ def benchmark_query(
     return BenchResult(
         query_id=query["id"],
         category=query["category"],
+        query=query["query"],
+        model_response=model_response,
         query_snippet=snippet,
         model=model,
         ttft_ms=round(ttft_ms,  2),
@@ -497,8 +505,10 @@ def main() -> None:
                         help="Restrict to these categories (case-sensitive)")
     parser.add_argument("--output", "-o", metavar="FILE",
                         help="Save full results to a JSON file")
-    parser.add_argument("--jsonl-output", action="store_true",
-                        help="Save results to a JSONL file in the script directory (one result per line)")
+    parser.add_argument("--jsonl-output", action="store_true", default=True,
+                        help="Save results to a JSONL file in the script directory (one result per line, default: enabled)")
+    parser.add_argument("--no-jsonl-output", dest="jsonl_output", action="store_false",
+                        help="Disable JSONL output")
     parser.add_argument("--prometheus", action="store_true",
                         help="Push per-query metrics to a Prometheus Pushgateway")
     parser.add_argument("--pushgateway-url", default="http://localhost:9091",

@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ollama Benchmark — qwen3:8b on Apple M4</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080a0d;
+    --surface: #0f1217;
+    --surface2: #161b22;
+    --border: #21262d;
+    --text: #e6edf3;
+    --muted: #7d8590;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --red: #f85149;
+    --orange: #e3b341;
+    --purple: #bc8cff;
+    --teal: #39d353;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 32px 48px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .header-left .eyebrow {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .header-left h1 {
+    font-family: var(--mono);
+    font-size: clamp(20px, 3vw, 32px);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+  }
+  .header-left h1 span { color: var(--accent); }
+  .header-right {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-end;
+  }
+  .header-right .chip {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .header-right .chip span { color: var(--text); }
+
+  /* ── HERO STATS ── */
+  .hero {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    background: var(--border);
+    gap: 1px;
+    border-bottom: 1px solid var(--border);
+  }
+  .stat {
+    background: var(--surface);
+    padding: 24px 28px;
+    transition: background 0.15s;
+  }
+  .stat:hover { background: var(--surface2); }
+  .stat .s-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .stat .s-val {
+    font-family: var(--mono);
+    font-size: clamp(20px, 2.2vw, 30px);
+    font-weight: 700;
+    line-height: 1;
+  }
+  .stat .s-sub {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 5px;
+  }
+  .c-blue { color: var(--accent); }
+  .c-green { color: var(--green); }
+  .c-yellow { color: var(--yellow); }
+  .c-red { color: var(--red); }
+  .c-purple { color: var(--purple); }
+  .c-orange { color: var(--orange); }
+
+  /* ── MAIN ── */
+  main { padding: 40px 48px; max-width: 1600px; margin: 0 auto; }
+
+  @media (max-width: 800px) {
+    main { padding: 20px 16px; }
+    .header { padding: 20px 16px; }
+  }
+
+  /* ── SECTIONS ── */
+  .section { margin-bottom: 52px; }
+  .sec-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sec-num { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 2px; }
+  .sec-title { font-family: var(--mono); font-size: 16px; font-weight: 700; }
+  .sec-sub { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-left: auto; }
+
+  /* ── GRID ── */
+  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .g21 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+
+  @media (max-width: 900px) {
+    .g2, .g3, .g21 { grid-template-columns: 1fr; }
+  }
+
+  /* ── PANEL ── */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px;
+  }
+  .panel-title {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  /* ── CHART ── */
+  .chart-wrap { position: relative; }
+  .chart-wrap.h240 { height: 240px; }
+  .chart-wrap.h300 { height: 300px; }
+  .chart-wrap.h180 { height: 180px; }
+
+  /* ── TABLE ── */
+  .tbl { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 10px; }
+  .tbl th {
+    text-align: left; color: var(--muted); padding: 7px 10px 7px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .tbl td {
+    padding: 8px 10px 8px 0;
+    border-bottom: 1px solid rgba(33,38,45,0.6);
+    vertical-align: middle;
+  }
+  .tbl tr:last-child td { border-bottom: none; }
+  .tbl tr:hover td { background: rgba(255,255,255,0.02); }
+  .tbl td.r { text-align: right; }
+  .tbl td.muted { color: var(--muted); }
+
+  /* ── BADGE ── */
+  .badge {
+    display: inline-block; font-family: var(--mono); font-size: 9px;
+    padding: 2px 7px; border-radius: 20px; font-weight: 700;
+    white-space: nowrap;
+  }
+  .bg { background: rgba(63,185,80,0.15); color: var(--green); }
+  .by { background: rgba(227,179,65,0.15); color: var(--orange); }
+  .br { background: rgba(248,81,73,0.2); color: var(--red); border: 1px solid rgba(248,81,73,0.3); }
+  .bb { background: rgba(88,166,255,0.12); color: var(--accent); }
+  .bp { background: rgba(188,140,255,0.15); color: var(--purple); }
+
+  /* ── ALERT ── */
+  .alert {
+    border-radius: 6px; padding: 14px 18px; margin-bottom: 16px;
+    font-size: 12px; line-height: 1.6;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .alert.red { background: rgba(248,81,73,0.08); border: 1px solid rgba(248,81,73,0.25); }
+  .alert.yellow { background: rgba(227,179,65,0.08); border: 1px solid rgba(227,179,65,0.25); }
+  .alert.blue { background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.2); }
+  .alert strong { color: var(--text); }
+  .alert .alert-label {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 2px;
+    text-transform: uppercase; margin-bottom: 4px;
+  }
+  .alert.red .alert-label { color: var(--red); }
+  .alert.yellow .alert-label { color: var(--orange); }
+  .alert.blue .alert-label { color: var(--accent); }
+
+  /* ── BAR ROW ── */
+  .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; font-family: var(--mono); font-size: 10px; }
+  .bar-row .lbl { width: 140px; flex-shrink: 0; color: var(--muted); font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar-track { flex: 1; height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 3px; }
+  .bar-val { width: 60px; text-align: right; color: var(--text); font-size: 10px; flex-shrink: 0; }
+
+  /* ── MEMORY VIZ ── */
+  .mem-bar {
+    height: 28px; border-radius: 4px; overflow: hidden;
+    display: flex; margin: 12px 0 8px; font-family: var(--mono); font-size: 9px;
+  }
+  .mem-seg {
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; white-space: nowrap; font-weight: 700;
+  }
+
+  /* ── LOG BLOCK ── */
+  .logblock {
+    background: #010409;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    font-family: var(--mono);
+    font-size: 10px;
+    line-height: 1.7;
+    overflow-x: auto;
+    color: var(--muted);
+  }
+  .logblock .ok { color: var(--green); }
+  .logblock .warn { color: var(--orange); }
+  .logblock .err { color: var(--red); }
+  .logblock .info { color: var(--accent); }
+  .logblock .val { color: var(--text); }
+
+  /* ── QUERY CARD ── */
+  .query-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .query-card.failed { border-color: rgba(248,81,73,0.4); }
+  .query-card.warning { border-color: rgba(227,179,65,0.3); }
+  .qc-header {
+    display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+    border-bottom: 1px solid var(--border); flex-wrap: wrap;
+  }
+  .qc-id { font-family: var(--mono); font-size: 9px; color: var(--muted); width: 30px; }
+  .qc-cat { font-family: var(--mono); font-size: 9px; }
+  .qc-query { font-size: 11px; color: var(--muted); flex: 1; min-width: 200px; }
+  .qc-metrics {
+    display: flex; gap: 20px; padding: 10px 16px; flex-wrap: wrap;
+  }
+  .qc-metric { font-family: var(--mono); font-size: 10px; }
+  .qc-metric .mk { color: var(--muted); font-size: 9px; margin-bottom: 2px; }
+  .qc-metric .mv { color: var(--text); }
+
+  /* ── TIMELINE ── */
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+  .tl-item {
+    display: flex; gap: 12px; align-items: stretch;
+    font-family: var(--mono); font-size: 10px;
+  }
+  .tl-line { display: flex; flex-direction: column; align-items: center; width: 20px; flex-shrink: 0; }
+  .tl-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+  .tl-spine { width: 1px; background: var(--border); flex: 1; margin: 3px 0; }
+  .tl-content { padding: 0 0 16px; flex: 1; }
+  .tl-time { color: var(--accent); margin-bottom: 2px; }
+  .tl-desc { color: var(--muted); }
+  .tl-dur { color: var(--text); font-weight: 700; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 20px 48px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  }
+
+  @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  .section { animation: fadeUp 0.4s ease both; }
+  .section:nth-child(1) { animation-delay: 0.05s; }
+  .section:nth-child(2) { animation-delay: 0.1s; }
+  .section:nth-child(3) { animation-delay: 0.15s; }
+  .section:nth-child(4) { animation-delay: 0.2s; }
+  .section:nth-child(5) { animation-delay: 0.25s; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-left">
+    <div class="eyebrow">// inference benchmark report</div>
+    <h1>qwen3:<span>8b</span> · Apple M4<br>Ollama 0.19.0 · Clinical Queries</h1>
+  </div>
+  <div class="header-right">
+    <div class="chip">Date: <span>2026-04-07 / 08</span></div>
+    <div class="chip">Quantization: <span>Q4_K_M</span></div>
+    <div class="chip">Layers: <span>37/37 → Metal GPU</span></div>
+    <div class="chip">Flash Attention: <span>Enabled</span></div>
+    <div class="chip">Context: <span>4096 KV tokens</span></div>
+    <div class="chip">Baseline for: <span>SGLang/vLLM migration</span></div>
+  </div>
+</header>
+
+<!-- HERO STATS -->
+<div class="hero">
+  <div class="stat">
+    <div class="s-label">Avg TPS</div>
+    <div class="s-val c-blue">13.2</div>
+    <div class="s-sub">output tok/sec</div>
+  </div>
+  <div class="stat">
+    <div class="s-label">Avg TTFT</div>
+    <div class="s-val c-yellow">308 ms</div>
+    <div class="s-sub">time to first token</div>
+  </div>
+  <div class="stat">
+    <div class="s-label">Avg TPOT</div>
+    <div class="s-val c-purple">61.4 ms</div>
+    <div class="s-sub">ms per output token</div>
+  </div>
+  <div class="stat">
+    <div class="s-label">Avg MBU</div>
+    <div class="s-val c-orange">15.0%</div>
+    <div class="s-sub">memory bandwidth used</div>
+  </div>
+  <div class="stat">
+    <div class="s-label">Queries Run</div>
+    <div class="s-val">10</div>
+    <div class="s-sub">9 success · 1 silent fail</div>
+  </div>
+  <div class="stat">
+    <div class="s-label">Total Output</div>
+    <div class="s-val c-green">20,255</div>
+    <div class="s-sub">tokens generated</div>
+  </div>
+  <div class="stat">
+    <div class="s-label">Model Size</div>
+    <div class="s-val">4.5 GB</div>
+    <div class="s-sub">Metal · Q4_K_M</div>
+  </div>
+  <div class="stat">
+    <div class="s-label">Factual Errors</div>
+    <div class="s-val c-red">1</div>
+    <div class="s-sub">TOPAZ-1 hallucination</div>
+  </div>
+</div>
+
+<main>
+
+  <!-- ══════════════════════════════ -->
+  <!-- SECTION 1: CRITICAL FLAGS     -->
+  <!-- ══════════════════════════════ -->
+  <section class="section">
+    <div class="sec-header">
+      <span class="sec-num">01</span>
+      <h2 class="sec-title">Critical Flags</h2>
+      <span class="sec-sub">2 issues requiring attention before production</span>
+    </div>
+
+    <div class="alert red">
+      <div class="alert-icon">⚠</div>
+      <div>
+        <div class="alert-label">Silent Failure — Query ID 18 · Pharmacology</div>
+        <strong>Query:</strong> "What is the dosing adjustment for vancomycin in patients with renal impairment?"<br>
+        The model ran for <strong>5 minutes 0 seconds</strong> (confirmed from GIN log: 00:18:57, 5m0s) and returned <strong>zero output tokens</strong>. <code>error: null</code> — the failure was completely silent. No exception, no fallback, no partial output. In a clinical pipeline, this would silently drop a pharmacology query on a renally-dosed nephrotoxic antibiotic. <strong>Requires explicit empty-output detection and retry logic before production deployment.</strong>
+      </div>
+    </div>
+
+    <div class="alert red">
+      <div class="alert-icon">⚠</div>
+      <div>
+        <div class="alert-label">Factual Hallucination — Query ID 82 · Clinical Trials · TOPAZ-1</div>
+        <strong>Query:</strong> "Summarize the TOPAZ-1 trial findings on durvalumab in biliary tract cancer."<br>
+        The model stated the trial was "stopped early for futility" and that durvalumab showed "no improvement in overall survival." This is <strong>factually inverted.</strong> TOPAZ-1 (NEJM, 2022) demonstrated that durvalumab + gemcitabine/cisplatin significantly improved overall survival vs. placebo in <em>first-line</em> BTC (HR 0.80, p=0.021), leading to FDA approval. The model conflated it with a failed second-line trial. This is a high-stakes error in a clinical AI context — a clinician querying treatment options for biliary tract cancer would receive actively incorrect guidance. <strong>Retrieval augmentation (RAG) is not optional for clinical trial queries.</strong>
+      </div>
+    </div>
+
+    <div class="alert yellow">
+      <div class="alert-icon">◈</div>
+      <div>
+        <div class="alert-label">15% MBU — Memory Bandwidth Underutilization</div>
+        The M4's unified memory bandwidth is 120 GB/s. At 15% MBU, the model is using ~18 GB/s. This is Ollama's single-sequence, non-batching architecture — there is no prefill/decode pipeline overlap, no continuous batching. The model is waiting between tokens. <strong>SGLang with RadixAttention or vLLM with PagedAttention will significantly improve this metric on the same hardware.</strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════ -->
+  <!-- SECTION 2: SYSTEM CONFIG      -->
+  <!-- ══════════════════════════════ -->
+  <section class="section">
+    <div class="sec-header">
+      <span class="sec-num">02</span>
+      <h2 class="sec-title">System Configuration</h2>
+      <span class="sec-sub">from ollama server logs · 2026-04-07T22:06</span>
+    </div>
+
+    <div class="g21" style="margin-bottom:16px;">
+      <div class="panel">
+        <div class="panel-title">Memory Layout (17.18 GB Total Unified)</div>
+        <div class="mem-bar">
+          <div class="mem-seg" style="width:26.2%;background:rgba(88,166,255,0.7);color:#000;font-size:8px;padding:0 4px;">Model<br>4.5GB</div>
+          <div class="mem-seg" style="width:3.35%;background:rgba(88,166,255,0.35);font-size:8px;padding:0 2px;"></div>
+          <div class="mem-seg" style="width:1.94%;background:rgba(188,140,255,0.6);color:#000;font-size:7px;"></div>
+          <div class="mem-seg" style="width:0.58%;background:rgba(188,140,255,0.4);font-size:7px;"></div>
+          <div class="mem-seg" style="width:3.35%;background:rgba(63,185,80,0.5);font-size:8px;"></div>
+          <div class="mem-seg" style="width:64.6%;background:rgba(255,255,255,0.04);color:var(--muted);font-size:9px;">OS / free ~11.1 GB</div>
+        </div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;font-family:var(--mono);font-size:9px;color:var(--muted);">
+          <span style="color:var(--accent)">■</span> Model weights Metal: 4.5 GB
+          <span style="color:rgba(88,166,255,0.4)">■</span> Model weights CPU: 333 MB
+          <span style="color:var(--purple)">■</span> KV Cache: 576 MB
+          <span style="color:rgba(188,140,255,0.4)">■</span> Compute CPU: 8 MB
+          <span style="color:var(--green)">■</span> Compute Metal: 100 MB
+        </div>
+        <div style="margin-top:16px;">
+          <div class="panel-title">Observed Usage During Benchmark</div>
+          <div class="bar-row">
+            <span class="lbl">mem_used (avg)</span>
+            <div class="bar-track"><div class="bar-fill" style="width:83.4%;background:var(--accent)"></div></div>
+            <span class="bar-val">14.32 GB</span>
+          </div>
+          <div class="bar-row">
+            <span class="lbl">mem_free (avg)</span>
+            <div class="bar-track"><div class="bar-fill" style="width:16.6%;background:var(--green)"></div></div>
+            <span class="bar-val">2.86 GB</span>
+          </div>
+          <div class="bar-row">
+            <span class="lbl">peak mem_used</span>
+            <div class="bar-track"><div class="bar-fill" style="width:84.2%;background:var(--orange)"></div></div>
+            <span class="bar-val">14.47 GB</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Runtime Config</div>
+        <table class="tbl">
+          <tbody>
+            <tr><td class="muted">Model</td><td>Qwen3 8B</td></tr>
+            <tr><td class="muted">Quant</td><td>Q4_K_M</td></tr>
+            <tr><td class="muted">Tensors</td><td>399</td></tr>
+            <tr><td class="muted">KV pairs</td><td>29</td></tr>
+            <tr><td class="muted">Layers total</td><td>37</td></tr>
+            <tr><td class="muted">Offloaded</td><td style="color:var(--green)">37/37 → Metal</td></tr>
+            <tr><td class="muted">Flash Attn</td><td style="color:var(--green)">Enabled</td></tr>
+            <tr><td class="muted">KV context</td><td>4096 tokens</td></tr>
+            <tr><td class="muted">Batch size</td><td>512</td></tr>
+            <tr><td class="muted">Parallel</td><td>1 (single sequence)</td></tr>
+            <tr><td class="muted">GPU family</td><td>Apple9 / Metal4</td></tr>
+            <tr><td class="muted">Bandwidth</td><td>120 GB/s</td></tr>
+            <tr><td class="muted">Tensor API</td><td style="color:var(--orange)">Disabled (pre-M5)</td></tr>
+            <tr><td class="muted">Model load</td><td>6.61 seconds</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Ollama Server Log — Startup</div>
+      <div class="logblock">
+<span class="info">INFO</span> enabling flash attention<br>
+<span class="info">INFO</span> system memory  total=<span class="val">16.0 GiB</span>  free=<span class="val">3.7 GiB</span>  free_swap=<span class="val">0 B</span><br>
+<span class="info">INFO</span> gpu memory  library=<span class="val">Metal</span>  available=<span class="val">11.3 GiB</span>  minimum=<span class="val">512.0 MiB</span><br>
+<span class="ok">INFO</span> model weights  device=<span class="val">Metal</span>  size=<span class="val">4.5 GiB</span><br>
+<span class="ok">INFO</span> model weights  device=<span class="val">CPU</span>    size=<span class="val">333.8 MiB</span><br>
+<span class="ok">INFO</span> kv cache      device=<span class="val">Metal</span>  size=<span class="val">576.0 MiB</span><br>
+<span class="ok">INFO</span> compute graph device=<span class="val">Metal</span>  size=<span class="val">100.0 MiB</span><br>
+<span class="ok">INFO</span> total memory  size=<span class="val">5.5 GiB</span><br>
+<span class="ok">INFO</span> offloaded <span class="val">36</span> repeating layers to GPU<br>
+<span class="ok">INFO</span> offloaded output layer to GPU → <span class="ok">37/37 layers offloaded</span><br>
+<span class="warn">WARN</span> ggml_metal: tensor API disabled for pre-M5 and pre-A19 devices<br>
+<span class="ok">INFO</span> llama runner started in <span class="val">6.61 seconds</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════ -->
+  <!-- SECTION 3: PERF METRICS       -->
+  <!-- ══════════════════════════════ -->
+  <section class="section">
+    <div class="sec-header">
+      <span class="sec-num">03</span>
+      <h2 class="sec-title">Performance Metrics</h2>
+      <span class="sec-sub">9 successful queries · Q18 excluded from averages</span>
+    </div>
+
+    <div class="g2" style="margin-bottom:16px;">
+      <div class="panel">
+        <div class="panel-title">TPS per Query (Output Tokens/Second)</div>
+        <div class="chart-wrap h240">
+          <canvas id="tpsChart"></canvas>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">TTFT per Query (ms)</div>
+        <div class="chart-wrap h240">
+          <canvas id="ttftChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="g2" style="margin-bottom:16px;">
+      <div class="panel">
+        <div class="panel-title">TPOT per Query (ms/token)</div>
+        <div class="chart-wrap h240">
+          <canvas id="tpotChart"></canvas>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">MBU % per Query</div>
+        <div class="chart-wrap h240">
+          <canvas id="mbuChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Output Tokens vs Total Duration</div>
+      <div class="chart-wrap h240">
+        <canvas id="tokenDurChart"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════ -->
+  <!-- SECTION 4: QUERY RESULTS      -->
+  <!-- ══════════════════════════════ -->
+  <section class="section">
+    <div class="sec-header">
+      <span class="sec-num">04</span>
+      <h2 class="sec-title">Per-Query Results</h2>
+      <span class="sec-sub">10 queries · clinical categories</span>
+    </div>
+
+    <!-- FULL TABLE -->
+    <div class="panel" style="margin-bottom:16px;overflow-x:auto;">
+      <div class="panel-title">Complete Benchmark Table</div>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th class="r">TTFT (ms)</th>
+            <th class="r">TPS</th>
+            <th class="r">TPOT (ms)</th>
+            <th class="r">Output Tok</th>
+            <th class="r">Total (s)</th>
+            <th class="r">MBU %</th>
+            <th class="r">Mem Used</th>
+            <th>Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="muted">Q4</td>
+            <td>Drug Interactions</td>
+            <td><span class="badge bg">OK</span></td>
+            <td class="r" style="color:var(--green)">175.5</td>
+            <td class="r" style="color:var(--green)">17.57</td>
+            <td class="r">56.9</td>
+            <td class="r">2,827</td>
+            <td class="r">162.5</td>
+            <td class="r" style="color:var(--orange)">19.9%</td>
+            <td class="r muted">14.32 GB</td>
+            <td class="muted">Best TTFT & TPS</td>
+          </tr>
+          <tr>
+            <td class="muted">Q14</td>
+            <td>Differential Dx</td>
+            <td><span class="badge bg">OK</span></td>
+            <td class="r">285.0</td>
+            <td class="r">14.88</td>
+            <td class="r">67.2</td>
+            <td class="r">3,027</td>
+            <td class="r">205.3</td>
+            <td class="r">16.9%</td>
+            <td class="r muted">14.35 GB</td>
+            <td class="muted">Longest output</td>
+          </tr>
+          <tr>
+            <td class="muted">Q15</td>
+            <td>Differential Dx</td>
+            <td><span class="badge bg">OK</span></td>
+            <td class="r">304.2</td>
+            <td class="r">14.19</td>
+            <td class="r">70.5</td>
+            <td class="r">3,176</td>
+            <td class="r">225.8</td>
+            <td class="r">16.1%</td>
+            <td class="r muted">14.08 GB</td>
+            <td class="muted">Highest token count</td>
+          </tr>
+          <tr style="background:rgba(248,81,73,0.05);">
+            <td class="muted">Q18</td>
+            <td>Pharmacology</td>
+            <td><span class="badge br">SILENT FAIL</span></td>
+            <td class="r" style="color:var(--red)">0</td>
+            <td class="r" style="color:var(--red)">0</td>
+            <td class="r" style="color:var(--red)">0</td>
+            <td class="r" style="color:var(--red)">0</td>
+            <td class="r" style="color:var(--red)">~300</td>
+            <td class="r">—</td>
+            <td class="r muted">14.36 GB</td>
+            <td style="color:var(--red)">5m run, 0 tokens, error=null</td>
+          </tr>
+          <tr>
+            <td class="muted">Q29</td>
+            <td>Oncology</td>
+            <td><span class="badge bg">OK</span></td>
+            <td class="r" style="color:var(--red)">439.2</td>
+            <td class="r">14.24</td>
+            <td class="r">70.2</td>
+            <td class="r">1,709</td>
+            <td class="r">121.6</td>
+            <td class="r">16.1%</td>
+            <td class="r muted">14.24 GB</td>
+            <td class="muted">Highest TTFT</td>
+          </tr>
+          <tr>
+            <td class="muted">Q32</td>
+            <td>Infectious Disease</td>
+            <td><span class="badge bg">OK</span></td>
+            <td class="r">322.9</td>
+            <td class="r">14.31</td>
+            <td class="r">69.9</td>
+            <td class="r">1,415</td>
+            <td class="r">100.0</td>
+            <td class="r">16.2%</td>
+            <td class="r muted">14.31 GB</td>
+            <td class="muted">—</td>
+          </tr>
+          <tr>
+            <td class="muted">Q36</td>
+            <td>Cardiology</td>
+            <td><span class="badge bg">OK</span></td>
+            <td class="r">309.5</td>
+            <td class="r" style="color:var(--orange)">13.87</td>
+            <td class="r" style="color:var(--orange)">72.1</td>
+            <td class="r">2,644</td>
+            <td class="r">192.3</td>
+            <td class="r">15.7%</td>
+            <td class="r muted">14.47 GB</td>
+            <td class="muted">Lowest TPS</td>
+          </tr>
+          <tr style="background:rgba(227,179,65,0.04);">
+            <td class="muted">Q82</td>
+            <td>Clinical Trials</td>
+            <td><span class="badge by">HALLUCINATION</span></td>
+            <td class="r">326.7</td>
+            <td class="r">14.06</td>
+            <td class="r">71.2</td>
+            <td class="r">1,044</td>
+            <td class="r">75.2</td>
+            <td class="r">15.9%</td>
+            <td class="r muted">14.10 GB</td>
+            <td style="color:var(--orange)">TOPAZ-1 inverted</td>
+          </tr>
+          <tr>
+            <td class="muted">Q87</td>
+            <td>Medical Ethics</td>
+            <td><span class="badge bg">OK</span></td>
+            <td class="r">299.5</td>
+            <td class="r">13.96</td>
+            <td class="r">71.6</td>
+            <td class="r">1,911</td>
+            <td class="r">138.3</td>
+            <td class="r">15.8%</td>
+            <td class="r muted">14.36 GB</td>
+            <td class="muted">—</td>
+          </tr>
+          <tr>
+            <td class="muted">Q95</td>
+            <td>Research Method.</td>
+            <td><span class="badge bg">OK</span></td>
+            <td class="r">324.9</td>
+            <td class="r">13.87</td>
+            <td class="r">72.1</td>
+            <td class="r">2,502</td>
+            <td class="r">182.1</td>
+            <td class="r">15.7%</td>
+            <td class="r muted">14.33 GB</td>
+            <td class="muted">—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════ -->
+  <!-- SECTION 5: GIN REQUEST LOG    -->
+  <!-- ══════════════════════════════ -->
+  <section class="section">
+    <div class="sec-header">
+      <span class="sec-num">05</span>
+      <h2 class="sec-title">Request Timeline (GIN Log)</h2>
+      <span class="sec-sub">00:03 – 00:32 · April 8 2026</span>
+    </div>
+
+    <div class="g2" style="margin-bottom:16px;">
+      <div class="panel">
+        <div class="panel-title">Request Duration Breakdown</div>
+        <div class="chart-wrap h300">
+          <canvas id="ginChart"></canvas>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">GIN Request Log</div>
+        <div class="logblock" style="max-height:320px;overflow-y:auto;">
+<span class="ok">200</span> | <span class="val">1m2s</span>   | 00:03:15 | POST /api/generate  <span class="muted"># warmup / early run</span><br>
+<span class="ok">200</span> | <span class="val">2.9ms</span>  | 00:03:56 | GET  /<br>
+<span class="ok">200</span> | <span class="val">10ms</span>   | 00:03:56 | GET  /api/tags<br>
+<span class="ok">200</span> | <span class="val">6.758s</span> | 00:04:03 | POST /api/generate  <span class="muted"># short test</span><br>
+<span class="ok">200</span> | <span class="val">2m42s</span>  | 00:06:45 | POST /api/generate  <span class="muted"># Q4 Drug Interactions (162s)</span><br>
+<span class="ok">200</span> | <span class="val">3m25s</span>  | 00:10:11 | POST /api/generate  <span class="muted"># Q14 Diff Dx (205s)</span><br>
+<span class="ok">200</span> | <span class="val">3m45s</span>  | 00:13:57 | POST /api/generate  <span class="muted"># Q15 Diff Dx (226s)</span><br>
+<span class="warn">200</span> | <span class="err">5m00s</span>  | 00:18:57 | POST /api/generate  <span class="err"># Q18 SILENT FAIL — 0 tokens, 300s</span><br>
+<span class="ok">200</span> | <span class="val">2m01s</span>  | 00:20:58 | POST /api/generate  <span class="muted"># Q29 Oncology (122s)</span><br>
+<span class="ok">200</span> | <span class="val">1m40s</span>  | 00:22:39 | POST /api/generate  <span class="muted"># Q32 Infectious Disease (100s)</span><br>
+<span class="ok">200</span> | <span class="val">3m12s</span>  | 00:25:51 | POST /api/generate  <span class="muted"># Q36 Cardiology (192s)</span><br>
+<span class="ok">200</span> | <span class="val">1m15s</span>  | 00:27:06 | POST /api/generate  <span class="muted"># Q82 Clinical Trials (75s) [TOPAZ-1]</span><br>
+<span class="ok">200</span> | <span class="val">2m18s</span>  | 00:29:25 | POST /api/generate  <span class="muted"># Q87 Medical Ethics (138s)</span><br>
+<span class="ok">200</span> | <span class="val">3m02s</span>  | 00:32:27 | POST /api/generate  <span class="muted"># Q95 Research Methodology (182s)</span><br>
+<span class="muted">^C — benchmark terminated</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Total Session Duration</div>
+      <div style="display:flex;gap:0;flex-wrap:wrap;">
+        <div style="padding:16px 28px;border-right:1px solid var(--border);">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;margin-bottom:6px;">WALL CLOCK</div>
+          <div style="font-family:var(--mono);font-size:26px;color:var(--accent);font-weight:700;">~29 min</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px;">00:03 → 00:32</div>
+        </div>
+        <div style="padding:16px 28px;border-right:1px solid var(--border);">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;margin-bottom:6px;">COMPUTE (excl. Q18)</div>
+          <div style="font-family:var(--mono);font-size:26px;color:var(--green);font-weight:700;">~1,403s</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px;">23.4 min generating</div>
+        </div>
+        <div style="padding:16px 28px;border-right:1px solid var(--border);">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;margin-bottom:6px;">Q18 WASTED COMPUTE</div>
+          <div style="font-family:var(--mono);font-size:26px;color:var(--red);font-weight:700;">~300s</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px;">17.6% of session</div>
+        </div>
+        <div style="padding:16px 28px;">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;margin-bottom:6px;">TOKENS GENERATED</div>
+          <div style="font-family:var(--mono);font-size:26px;color:var(--purple);font-weight:700;">20,255</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px;">avg 2,251 / query</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════ -->
+  <!-- SECTION 6: MIGRATION BASELINE -->
+  <!-- ══════════════════════════════ -->
+  <section class="section">
+    <div class="sec-header">
+      <span class="sec-num">06</span>
+      <h2 class="sec-title">Migration Baseline — Ollama → SGLang/vLLM</h2>
+      <span class="sec-sub">what to expect after the swap</span>
+    </div>
+
+    <div class="g3">
+      <div class="panel">
+        <div class="panel-title">Current (Ollama 0.19.0)</div>
+        <table class="tbl">
+          <tbody>
+            <tr><td class="muted">Avg TPS</td><td style="color:var(--accent)">13.2 tok/s</td></tr>
+            <tr><td class="muted">Avg TTFT</td><td style="color:var(--yellow)">308 ms</td></tr>
+            <tr><td class="muted">Avg TPOT</td><td>61.4 ms/tok</td></tr>
+            <tr><td class="muted">MBU</td><td style="color:var(--orange)">~15%</td></tr>
+            <tr><td class="muted">Batching</td><td style="color:var(--red)">None (seq=1)</td></tr>
+            <tr><td class="muted">KV reuse</td><td style="color:var(--red)">None</td></tr>
+            <tr><td class="muted">Silent failures</td><td style="color:var(--red)">Undetected</td></tr>
+            <tr><td class="muted">Tensor API</td><td style="color:var(--orange)">Disabled (M4)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Expected (SGLang / RadixAttention)</div>
+        <table class="tbl">
+          <tbody>
+            <tr><td class="muted">Avg TPS</td><td style="color:var(--green)">~20–30 tok/s ↑</td></tr>
+            <tr><td class="muted">Avg TTFT</td><td style="color:var(--green)">&lt;150ms (cached) ↓</td></tr>
+            <tr><td class="muted">Avg TPOT</td><td style="color:var(--green)">~40–50ms ↓</td></tr>
+            <tr><td class="muted">MBU</td><td style="color:var(--green)">~40–60% ↑</td></tr>
+            <tr><td class="muted">Batching</td><td style="color:var(--green)">Continuous</td></tr>
+            <tr><td class="muted">KV reuse</td><td style="color:var(--green)">RadixAttention</td></tr>
+            <tr><td class="muted">GPU target</td><td>Vast.ai RTX 3090/4090</td></tr>
+            <tr><td class="muted">Config swap</td><td style="color:var(--green)">YAML flag only</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Action Items Before Migration</div>
+        <table class="tbl">
+          <tbody>
+            <tr>
+              <td><span class="badge br">P0</span></td>
+              <td style="font-size:10px;">Add empty-output detection + retry for Q18 class failures</td>
+            </tr>
+            <tr>
+              <td><span class="badge br">P0</span></td>
+              <td style="font-size:10px;">Add RAG over trial DB for clinical-trials category queries</td>
+            </tr>
+            <tr>
+              <td><span class="badge by">P1</span></td>
+              <td style="font-size:10px;">Add output token count validation per query category</td>
+            </tr>
+            <tr>
+              <td><span class="badge by">P1</span></td>
+              <td style="font-size:10px;">Set timeout &lt;120s; abort + retry if threshold breached</td>
+            </tr>
+            <tr>
+              <td><span class="badge bb">P2</span></td>
+              <td style="font-size:10px;">Re-run same benchmark on SGLang; compare MBU directly</td>
+            </tr>
+            <tr>
+              <td><span class="badge bb">P2</span></td>
+              <td style="font-size:10px;">Run concurrent queries to validate batching gains</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span>qwen3:8b · Q4_K_M · Apple M4 · Ollama 0.19.0 · Baseline for SGLang/vLLM migration</span>
+  <span>10 queries · 9 success · 1 silent fail · 1 hallucination · 20,255 tokens · 2026-04-07/08</span>
+</footer>
+
+<script>
+Chart.defaults.color = '#7d8590';
+Chart.defaults.borderColor = '#21262d';
+Chart.defaults.font.family = "'IBM Plex Mono', monospace";
+Chart.defaults.font.size = 9;
+
+const labels = ['Q4\nDrug', 'Q14\nDiff Dx', 'Q15\nDiff Dx', 'Q29\nOncology', 'Q32\nInfect.', 'Q36\nCardio', 'Q82\nTrials', 'Q87\nEthics', 'Q95\nResearch'];
+const labelsFull = ['Q4 Drug Interactions','Q14 Diff Dx','Q15 Diff Dx','Q29 Oncology','Q32 Infectious Dis.','Q36 Cardiology','Q82 Clinical Trials','Q87 Medical Ethics','Q95 Research Method.'];
+
+const tpsData =   [17.57, 14.88, 14.19, 14.24, 14.31, 13.87, 14.06, 13.96, 13.87];
+const ttftData =  [175.5, 285.0, 304.2, 439.2, 322.9, 309.5, 326.7, 299.5, 324.9];
+const tpotData =  [56.9, 67.2, 70.5, 70.2, 69.9, 72.1, 71.2, 71.6, 72.1];
+const mbuData =   [19.9, 16.9, 16.1, 16.1, 16.2, 15.7, 15.9, 15.8, 15.7];
+const tokData =   [2827, 3027, 3176, 1709, 1415, 2644, 1044, 1911, 2502];
+const durData =   [162.5, 205.3, 225.8, 121.6, 100.0, 192.3, 75.2, 138.3, 182.1];
+
+const tpsColors = tpsData.map(v => v >= 17 ? 'rgba(63,185,80,0.7)' : v >= 15 ? 'rgba(88,166,255,0.6)' : 'rgba(188,140,255,0.55)');
+const ttftColors = ttftData.map((v,i) => i === 3 ? 'rgba(248,81,73,0.7)' : i === 0 ? 'rgba(63,185,80,0.7)' : 'rgba(88,166,255,0.55)');
+const mbuColors = mbuData.map(v => v >= 19 ? 'rgba(227,179,65,0.7)' : 'rgba(88,166,255,0.5)');
+const q82Color = (arr) => arr.map((v,i) => i === 6 ? 'rgba(227,179,65,0.8)' : 'rgba(88,166,255,0.55)');
+
+const opts = (title) => ({
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { display: false }, tooltip: { callbacks: { title: (items) => labelsFull[items[0].dataIndex] } } },
+  scales: { x: { grid: { display: false } }, y: { grid: { color: '#161b22' }, title: { display: true, text: title, font: { size: 8 }, color: '#7d8590' } } }
+});
+
+new Chart(document.getElementById('tpsChart'), {
+  type: 'bar',
+  data: { labels, datasets: [{ data: tpsData, backgroundColor: tpsColors, borderRadius: 3, borderWidth: 0 }] },
+  options: { ...opts('tok/s'), scales: { ...opts('tok/s').scales, y: { ...opts('tok/s').scales.y, min: 12 } } }
+});
+
+new Chart(document.getElementById('ttftChart'), {
+  type: 'bar',
+  data: { labels, datasets: [{ data: ttftData, backgroundColor: ttftColors, borderRadius: 3, borderWidth: 0 }] },
+  options: opts('ms')
+});
+
+new Chart(document.getElementById('tpotChart'), {
+  type: 'bar',
+  data: { labels, datasets: [{ data: tpotData, backgroundColor: q82Color(tpotData), borderRadius: 3, borderWidth: 0 }] },
+  options: { ...opts('ms/tok'), scales: { ...opts('ms/tok').scales, y: { ...opts('ms/tok').scales.y, min: 50 } } }
+});
+
+new Chart(document.getElementById('mbuChart'), {
+  type: 'bar',
+  data: { labels, datasets: [{ data: mbuData, backgroundColor: mbuColors, borderRadius: 3, borderWidth: 0 }] },
+  options: { ...opts('%'), scales: { ...opts('%').scales, y: { ...opts('%').scales.y, min: 13, max: 22 } } }
+});
+
+new Chart(document.getElementById('tokenDurChart'), {
+  type: 'bar',
+  data: {
+    labels: labelsFull,
+    datasets: [
+      { label: 'Output Tokens', data: tokData, backgroundColor: 'rgba(88,166,255,0.5)', borderRadius: 2, yAxisID: 'y1' },
+      { label: 'Duration (s)', data: durData, backgroundColor: 'rgba(63,185,80,0.4)', borderRadius: 2, yAxisID: 'y2', type: 'line', borderColor: 'rgba(63,185,80,0.7)', borderWidth: 2, pointRadius: 3, fill: false }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: true, labels: { boxWidth: 10, font: { size: 9 } } } },
+    scales: {
+      x: { grid: { display: false } },
+      y1: { grid: { color: '#161b22' }, title: { display: true, text: 'output tokens', font: { size: 8 }, color: '#7d8590' }, position: 'left' },
+      y2: { grid: { display: false }, title: { display: true, text: 'seconds', font: { size: 8 }, color: '#7d8590' }, position: 'right' }
+    }
+  }
+});
+
+// GIN timeline bar chart
+new Chart(document.getElementById('ginChart'), {
+  type: 'bar',
+  data: {
+    labels: ['warm.', 'test', 'Q4', 'Q14', 'Q15', 'Q18', 'Q29', 'Q32', 'Q36', 'Q82', 'Q87', 'Q95'],
+    datasets: [{
+      label: 'Duration (s)',
+      data: [62, 6.8, 162, 205, 226, 300, 121, 100, 192, 75, 138, 182],
+      backgroundColor: (ctx) => {
+        const i = ctx.dataIndex;
+        if (i === 5) return 'rgba(248,81,73,0.7)';
+        if (i === 11) return 'rgba(227,179,65,0.65)';
+        return 'rgba(88,166,255,0.5)';
+      },
+      borderRadius: 3, borderWidth: 0
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: '#161b22' }, title: { display: true, text: 'seconds', font: { size: 8 }, color: '#7d8590' } },
+      y: { grid: { display: false } }
+    }
+  }
+});
+</script>
+</body>
+</html>
