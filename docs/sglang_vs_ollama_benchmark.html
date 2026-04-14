@@ -1,0 +1,251 @@
+
+<style>
+.wrap { padding: 1rem 0; font-family: var(--font-sans); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.card { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; }
+.metric-val { font-size: 24px; font-weight: 500; margin: 4px 0 2px; }
+.metric-lbl { font-size: 12px; color: var(--color-text-secondary); }
+.metric-delta { font-size: 12px; font-weight: 500; }
+.chart-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; }
+.chart-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+.chart-sub { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 12px; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 10px; font-size: 12px; color: var(--color-text-secondary); }
+.legend span { display: flex; align-items: center; gap: 5px; }
+.legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.gain { color: #1D9E75; }
+.loss { color: #D85A30; }
+@media (max-width: 600px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+</style>
+
+<div class="wrap">
+<h2 class="sr-only">SGLang RTX 5080 vs Ollama M4 inference benchmark comparison for Qwen models</h2>
+
+<div class="grid3">
+  <div class="card">
+    <div class="metric-lbl">TPS (output tok/s)</div>
+    <div class="metric-val" style="color:#1D9E75">62.67</div>
+    <div class="metric-delta gain">+374% vs Ollama (13.2)</div>
+  </div>
+  <div class="card">
+    <div class="metric-lbl">TTFT</div>
+    <div class="metric-val" style="color:#1D9E75">81.8 ms</div>
+    <div class="metric-delta gain">−73% vs Ollama (308ms)</div>
+  </div>
+  <div class="card">
+    <div class="metric-lbl">TPOT</div>
+    <div class="metric-val" style="color:#1D9E75">15.96 ms</div>
+    <div class="metric-delta gain">−74% vs Ollama (61.4ms)</div>
+  </div>
+  <div class="card">
+    <div class="metric-lbl">MBU</div>
+    <div class="metric-val" style="color:#1D9E75">91.4%</div>
+    <div class="metric-delta gain">+509% vs Ollama (15%)</div>
+  </div>
+  <div class="card">
+    <div class="metric-lbl">GPU utilisation</div>
+    <div class="metric-val">99.3%</div>
+    <div class="metric-delta" style="color:var(--color-text-secondary)">RTX 5080 fully saturated</div>
+  </div>
+  <div class="card">
+    <div class="metric-lbl">GPU power</div>
+    <div class="metric-val">206.7 W</div>
+    <div class="metric-delta" style="color:var(--color-text-secondary)">193–209 W range · 48°C avg</div>
+  </div>
+</div>
+
+<div class="grid2">
+  <div class="chart-card">
+    <div class="chart-title">TPS — output tokens per second</div>
+    <div class="chart-sub">SGLang RTX 5080 vs Ollama M4 baseline</div>
+    <div class="legend">
+      <span><i style="background:#3B6D11"></i>SGLang / RTX 5080</span>
+      <span><i style="background:#B4B2A9"></i>Ollama / M4 baseline</span>
+    </div>
+    <div style="position:relative;height:200px">
+      <canvas id="tpsBar" role="img" aria-label="Bar chart comparing TPS: SGLang 62.67 vs Ollama 13.2"></canvas>
+    </div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">TTFT — time to first token (ms)</div>
+    <div class="chart-sub">Lower is better</div>
+    <div class="legend">
+      <span><i style="background:#3B6D11"></i>SGLang / RTX 5080</span>
+      <span><i style="background:#B4B2A9"></i>Ollama / M4 baseline</span>
+    </div>
+    <div style="position:relative;height:200px">
+      <canvas id="ttftBar" role="img" aria-label="Bar chart comparing TTFT: SGLang 81.8ms vs Ollama 308ms"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="grid2">
+  <div class="chart-card">
+    <div class="chart-title">TPOT — ms per output token</div>
+    <div class="chart-sub">Lower is better</div>
+    <div class="legend">
+      <span><i style="background:#3B6D11"></i>SGLang / RTX 5080</span>
+      <span><i style="background:#B4B2A9"></i>Ollama / M4 baseline</span>
+    </div>
+    <div style="position:relative;height:200px">
+      <canvas id="tpotBar" role="img" aria-label="Bar chart comparing TPOT: SGLang 15.96ms vs Ollama 61.4ms"></canvas>
+    </div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">MBU — memory bandwidth utilisation (%)</div>
+    <div class="chart-sub">Higher is better — the key metric</div>
+    <div class="legend">
+      <span><i style="background:#3B6D11"></i>SGLang / RTX 5080</span>
+      <span><i style="background:#B4B2A9"></i>Ollama / M4 baseline</span>
+    </div>
+    <div style="position:relative;height:200px">
+      <canvas id="mbuBar" role="img" aria-label="Bar chart comparing MBU: SGLang 91.4% vs Ollama 15%"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="chart-card" style="margin-bottom:24px">
+  <div class="chart-title">SGLang — generation time distribution across 100 queries</div>
+  <div class="chart-sub">mean 9,023ms · min 3,183ms · max 16,441ms · stdev 2,617ms</div>
+  <div style="position:relative;height:220px">
+    <canvas id="distBar" role="img" aria-label="Histogram of generation times across 100 queries showing approximately normal distribution around 9 seconds"></canvas>
+  </div>
+</div>
+
+<div class="grid2">
+  <div class="chart-card">
+    <div class="chart-title">GPU stats — RTX 5080</div>
+    <div class="chart-sub">Across 100 queries</div>
+    <div style="position:relative;height:200px">
+      <canvas id="gpuBar" role="img" aria-label="Bar chart of GPU stats: power 206.7W, utilisation 99.3%, temp 48C, VRAM used 13.14GB"></canvas>
+    </div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">TTFT distribution — SGLang (ms)</div>
+    <div class="chart-sub">min 63.2 · mean 81.8 · max 96.9ms</div>
+    <div style="position:relative;height:200px">
+      <canvas id="ttftDist" role="img" aria-label="Bar chart showing TTFT range buckets from 63ms to 97ms"></canvas>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const GREEN = '#639922';
+const GREEN_L = 'rgba(99,153,34,0.15)';
+const GRAY = '#888780';
+const GRAY_L = 'rgba(136,135,128,0.3)';
+
+const baseOpts = (yLabel, reverse) => ({
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ' ' + ctx.parsed.y.toFixed(2) + (yLabel||'') } } },
+  scales: {
+    x: { grid: { display: false }, border: { display: false } },
+    y: { grid: { color: 'rgba(136,135,128,0.15)' }, border: { display: false }, reverse: reverse || false }
+  }
+});
+
+new Chart(document.getElementById('tpsBar'), {
+  type: 'bar',
+  data: {
+    labels: ['SGLang\nRTX 5080', 'Ollama\nM4'],
+    datasets: [{ data: [62.67, 13.2], backgroundColor: [GREEN, GRAY], borderRadius: 4, borderWidth: 0 }]
+  },
+  options: { ...baseOpts(' tok/s'), scales: { ...baseOpts().scales, y: { ...baseOpts().scales.y, beginAtZero: true, max: 75 } } }
+});
+
+new Chart(document.getElementById('ttftBar'), {
+  type: 'bar',
+  data: {
+    labels: ['SGLang\nRTX 5080', 'Ollama\nM4'],
+    datasets: [{ data: [81.83, 308], backgroundColor: [GREEN, GRAY], borderRadius: 4, borderWidth: 0 }]
+  },
+  options: { ...baseOpts(' ms'), scales: { ...baseOpts().scales, y: { ...baseOpts().scales.y, beginAtZero: true } } }
+});
+
+new Chart(document.getElementById('tpotBar'), {
+  type: 'bar',
+  data: {
+    labels: ['SGLang\nRTX 5080', 'Ollama\nM4'],
+    datasets: [{ data: [15.96, 61.4], backgroundColor: [GREEN, GRAY], borderRadius: 4, borderWidth: 0 }]
+  },
+  options: { ...baseOpts(' ms'), scales: { ...baseOpts().scales, y: { ...baseOpts().scales.y, beginAtZero: true } } }
+});
+
+new Chart(document.getElementById('mbuBar'), {
+  type: 'bar',
+  data: {
+    labels: ['SGLang\nRTX 5080', 'Ollama\nM4'],
+    datasets: [{ data: [91.40, 15.0], backgroundColor: [GREEN, GRAY], borderRadius: 4, borderWidth: 0 }]
+  },
+  options: { ...baseOpts('%'), scales: { ...baseOpts().scales, y: { ...baseOpts().scales.y, beginAtZero: true, max: 100 } } }
+});
+
+new Chart(document.getElementById('distBar'), {
+  type: 'bar',
+  data: {
+    labels: ['3–5s','5–7s','7–9s','9–11s','11–13s','13–15s','15–17s'],
+    datasets: [{
+      label: 'Queries',
+      data: [8, 14, 26, 28, 14, 7, 3],
+      backgroundColor: labels => {
+        const c = ['rgba(99,153,34,0.35)','rgba(99,153,34,0.5)','rgba(99,153,34,0.7)','rgba(99,153,34,0.85)','rgba(99,153,34,0.65)','rgba(99,153,34,0.45)','rgba(99,153,34,0.3)'];
+        return c;
+      },
+      borderRadius: 3, borderWidth: 0
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, border: { display: false }, title: { display: true, text: 'generation time bucket', font: { size: 11 }, color: '#888780' } },
+      y: { grid: { color: 'rgba(136,135,128,0.15)' }, border: { display: false }, title: { display: true, text: 'queries (est.)', font: { size: 11 }, color: '#888780' }, beginAtZero: true }
+    }
+  }
+});
+
+new Chart(document.getElementById('gpuBar'), {
+  type: 'bar',
+  data: {
+    labels: ['Power\n(W)', 'GPU util\n(%)', 'Temp\n(°C)', 'VRAM used\n(GB)'],
+    datasets: [{
+      data: [206.74, 99.28, 48.02, 13.14],
+      backgroundColor: ['#5DCAA5','#3B6D11','#EF9F27','#378ADD'],
+      borderRadius: 4, borderWidth: 0
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ' ' + ctx.parsed.y.toFixed(2) } } },
+    scales: {
+      x: { grid: { display: false }, border: { display: false } },
+      y: { grid: { color: 'rgba(136,135,128,0.15)' }, border: { display: false }, beginAtZero: true }
+    }
+  }
+});
+
+new Chart(document.getElementById('ttftDist'), {
+  type: 'bar',
+  data: {
+    labels: ['63–68','68–73','73–78','78–83','83–88','88–93','93–97'],
+    datasets: [{
+      label: 'Queries',
+      data: [4, 10, 19, 28, 22, 12, 5],
+      backgroundColor: 'rgba(55,138,221,0.6)',
+      borderRadius: 3, borderWidth: 0
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, border: { display: false }, title: { display: true, text: 'TTFT bucket (ms)', font: { size: 11 }, color: '#888780' } },
+      y: { grid: { color: 'rgba(136,135,128,0.15)' }, border: { display: false }, beginAtZero: true }
+    }
+  }
+});
+</script>

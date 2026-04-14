@@ -18,3 +18,7 @@ TODO.md
 # env
 
 .env
+results/
+*.pyc
+*.egg-info/
+.pytest_cache/

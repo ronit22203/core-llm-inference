@@ -556,7 +556,7 @@ def main() -> None:
 
     print()
     print("  ╔════════════════════════════════════════════════════════════╗")
-    print(f"  ║  SGLang Benchmark  │  {args.model:<36}  ║")
+    print(f" ║  SGLang Benchmark  │  {args.model:<36}                     ║")                
     print("  ╚════════════════════════════════════════════════════════════╝")
     print(f"  GPU:       {gpu0['gpu_name']}  →  {bandwidth_gbps} GB/s peak bandwidth")
     print(f"  Model:     {args.model}  (~{model_size_gb:.1f} GB)")

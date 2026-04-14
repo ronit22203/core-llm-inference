@@ -1,0 +1,34 @@
+# core-llm-inference — default configuration
+# All values can be overridden by environment variables (see .env.example).
+
+# Inference engine
+engine: "sglang"                    # sglang | vllm
+model: "Qwen/Qwen2.5-7B-Instruct"
+model_size_gb: 14.0                 # set null to auto-detect from name
+
+# Server endpoint
+server:
+  host: "0.0.0.0"
+  port: 30000
+  timeout_seconds: 300
+
+# Hardware
+gpu:
+  type: "rtx-5080"                  # key into GPU_BANDWIDTH_GBPS table
+  peak_bandwidth_gbps: 960.0
+  nvidia_smi_path: "nvidia-smi"
+
+# Benchmark defaults
+benchmark:
+  num_queries: 10
+  concurrency: 1                    # 1 = sequential
+  warmup: false
+  categories: []                    # empty = all categories
+  output_dir: "results"
+  seed: 42
+
+# Observability
+monitoring:
+  prometheus_pushgateway: "http://localhost:9091"
+  enable_gpu_metrics: true
+  log_jsonl: true
