@@ -14,8 +14,8 @@ server:
 
 # Hardware
 gpu:
-  type: "rtx-5080"                  # key into GPU_BANDWIDTH_GBPS table
-  peak_bandwidth_gbps: 960.0
+  type: "l4"                        # key into GPU_BANDWIDTH_GBPS table
+  peak_bandwidth_gbps: 300.0
   nvidia_smi_path: "nvidia-smi"
 
 # Benchmark defaults

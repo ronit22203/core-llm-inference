@@ -13,7 +13,7 @@ Measure real-world throughput, latency, and hardware efficiency of your inferenc
 - **`status`** — Inspect server health, loaded models, GPU stats, and KV-cache utilisation
 - **JSONL export** — Timestamped result files written to `results/` after every run
 - **Prometheus / Grafana** — Push metrics to a Pushgateway; pre-built monitoring stack via Docker Compose
-- **GPU coverage** — NVIDIA RTX 30/40/50-series, A100, H100, L40S; Apple Silicon M1–M4
+- **GPU coverage** — NVIDIA RTX 30/40/50-series, A100, H100, L4, L40S; Apple Silicon M1–M4
 - **Configurable** — Single YAML file with full environment-variable overrides
 
 ---
@@ -175,7 +175,7 @@ monitoring:
 | `rtx-5090`, `rtx-5080`, `rtx-5070ti`, `rtx-5070` | `m4-max`, `m4-pro`, `m4` |
 | `rtx-4090`, `rtx-4080`, `rtx-4070ti`, `rtx-4070` | `m3-max`, `m3-pro`, `m3` |
 | `rtx-3090`, `rtx-3080` | `m2-ultra`, `m2-max`, `m2-pro`, `m2` |
-| `h100`, `a100-80`, `a100-40`, `l40s` | `m1-ultra`, `m1-max`, `m1-pro`, `m1` |
+| `h100`, `a100-80`, `a100-40`, `l40s`, `l4` | `m1-ultra`, `m1-max`, `m1-pro`, `m1` |
 
 ---
 

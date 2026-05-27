@@ -21,6 +21,7 @@ GPU_BANDWIDTH_GBPS: Dict[str, float] = {
     "a100-80":    2039.0,
     "h100":       3350.0,
     "l40s":        864.0,
+    "l4":          300.0,
 }
 
 # Peak memory bandwidth (GB/s) per Apple Silicon chip
