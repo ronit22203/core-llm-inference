@@ -1,0 +1,35 @@
+# Build context exclusions for core-llm-inference Docker image
+
+# Virtual environments — never include; pip installs are inside the image
+.venv/
+venv/
+env/
+
+# Benchmark results and test artefacts
+results/
+.pytest_cache/
+htmlcov/
+.coverage
+*.log
+
+# Test source — not needed at runtime
+tests/
+
+# Git history and IDE files
+.git/
+.gitignore
+.gitmodules
+.DS_Store
+*.swp
+*.swo
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Local env files
+.env
+.env.local
+.env.*.local
