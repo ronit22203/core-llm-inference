@@ -12,7 +12,7 @@ except ImportError:
     raise ImportError("pyyaml is required: pip install pyyaml")
 
 
-_DEFAULT_CONFIG = Path(__file__).parents[2] / "config" / "default.yaml"
+_DEFAULT_CONFIG = Path(__file__).parents[1] / "config" / "default.yaml"
 
 
 def load_config(config_file: Optional[Path] = None) -> Dict[str, Any]:
